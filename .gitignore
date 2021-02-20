@@ -1,3 +1,4 @@
 .vscode
 .venv
 rules/
+__pycache__/
