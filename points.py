@@ -22,7 +22,9 @@ def strip_mult(df):
     """ Function strips the regex-matched multipliers from a
     Pandas DF"""
 
-    return df[0].replace(r'\s\(X(\d)\)$', '', regex=True)
+    df[0] = df[0].replace(r'\s\(X(\d)\)$', '', regex=True)
+
+    return df
 
 
 
@@ -36,7 +38,6 @@ def process_points(df):
 
     for idx, row in df.iterrows():
         mults.append( extract_multiplier(row[0]) )
-        print(row[0])
 
     df['min_pts'] = mults
     df['max_pts'] = mults
