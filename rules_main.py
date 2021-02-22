@@ -5,6 +5,7 @@ import pandas as pd
 from os import listdir
 from os.path import isfile, join
 import re
+import logging
 
 
 # Imports from this package
@@ -16,6 +17,10 @@ from formatting import (Add_Item_Nums, Clean_Dataframe, Get_Category_Points,
 from log import pdf_log
 
 
+logging.basicConfig(filename='TSAscores.log', level=logging.INFO,
+                             format='%(asctime)s:%(name)s:%(levelname)s:%(message)s')
+
+logging.info("Starting PDF scrub")
 
 def decrypt_pdf(filename):
     """ Function to open a PDF, decrypt, and resave """
@@ -32,7 +37,7 @@ def decrypt_pdf(filename):
 mypath = 'rules/encrypted'
 onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
 
-print(onlyfiles)
+pdf_log(onlyfiles)
 
 
 df_all = pd.DataFrame(columns=['description', 'min_pt_desc', 'avg_pt_desc', 
@@ -66,9 +71,11 @@ for file in onlyfiles:
     PDF_Name = file
     
     decrypt_pdf(PDF_Name)
+    pdf_log(f"Decrypted {PDF_Name}")
 
     # Extract table data from the PDF
     name_table = camelot.read_pdf('rules/decrypted/' + PDF_Name, pages = '1-end')
+    pdf_log(f"In {PDF_Name} we have found {len(name_table)} tables")
 
     # Init some variable that will be used for all tables in PDF.
     dfs = []
@@ -85,7 +92,7 @@ for file in onlyfiles:
         match_header = re.search(pattern, table.df[0][0])
         
         if match_header:
-            print('Continued Found')
+            pdf_log(f"Continued Found block found in table {idx}. Appending to previous.")
             df = table.df.drop([0])
             dfs[count-1] = pd.concat([dfs[count-1], df]) 
             dfs[count-1]  = dfs[count-1].reset_index(drop=True)
@@ -93,7 +100,7 @@ for file in onlyfiles:
             dfs.append(table.df)
             count +- 1
 
-
+    pdf_log(f"After cleaning continued tables, we have {len(dfs)} tables")
     
     # After cleaning up the continued tables, process all normally.
     for idx, table in enumerate(dfs):
@@ -129,9 +136,12 @@ for file in onlyfiles:
 
             # Append the contents of this table to the list of all score items
             df_all = pd.concat([df_all,df])
-        
+
+            pdf_log(f"Done with {label}, adding to Dataframe.")
         # Extra newlines in terminal log for readability.
         print('\n\n')
+    
+    pdf_log(f"All table reads done with {PDF_Name} *****")
 
 # After all file(s) processed, convert category info to dataframe and export to csv.
 df_cat = pd.DataFrame({"event" : event, "cat_order" : cat_nums, "cat_names" : cat_names, "cat_total_pts" : cat_points, "round" : 0})
