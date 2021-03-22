@@ -55,7 +55,7 @@ cat_points = []
 # for only one item, You need a trailing comma to it stays as a list rather
 # than decomposing to a single variable.
 
-# onlyfiles = ['event130.pdf',]
+# onlyfiles = ['event207.pdf',]
 
 pattern_file = r"event(\d\d\d)"
 
@@ -75,6 +75,7 @@ for file in onlyfiles:
 
     # Extract table data from the PDF
     name_table = camelot.read_pdf('rules/decrypted/' + PDF_Name, pages = '1-end')
+
     pdf_log(f"In {PDF_Name} we have found {len(name_table)} tables")
 
     # Init some variable that will be used for all tables in PDF.
